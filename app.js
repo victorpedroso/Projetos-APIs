@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose'); // Importe o mongoose para interagir com o MongoDB
+const mongoose = require('mongoose');
 const app = express();
 const port = 5000;
 const cors = require('cors');
@@ -8,8 +8,8 @@ const cors = require('cors');
 app.use(bodyParser.json());
 app.use(cors());
 
-// Conexão com o banco de dados MongoDB (certifique-se de substituir com sua própria URL)
-mongoose.connect('mongodb+srv://<>/usuario:<senha>@cluster0.tz545aq.mongodb.net/controleFinanceiro', {
+// Conexão com o banco de dados MongoDB 
+mongoose.connect('mongodb+srv://victor1pedroso:TjUUgnwP09jd9jXy@cluster0.tz545aq.mongodb.net/controleFinanceiro', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -22,14 +22,13 @@ const Transaction = mongoose.model('transacoes', {
   amount: Number,
   expense: Boolean,
 });
-
+// Definição de um modelo para usuários no MongoDB
 const Usuario = mongoose.model('users', {
     id: Number,
     nome: String,
     email: String,
     senha: String
 });
-
 
 // Rota para adicionar uma nova transação
 app.post('/transacao', async (req, res) => {
@@ -41,7 +40,7 @@ app.post('/transacao', async (req, res) => {
       return res.status(400).json({ error: 'Dados de transação inválidos' });
     }
 
-    // Crie uma nova instância do modelo Transaction e salve-a no MongoDB
+    // Cria uma nova instância do modelo Transaction e salva 
     const newTransaction = new Transaction(data);
     await newTransaction.save();
 
@@ -52,10 +51,9 @@ app.post('/transacao', async (req, res) => {
   }
 });
 
-// Rota para obter todas as transações do banco de dados MongoDB
+// Rota para obter todas as transações 
 app.get('/todastransacoes', async (req, res) => {
   try {
-    // Consulte o MongoDB para recuperar todas as transações
     const transacoes = await Transaction.find({});
     res.json(transacoes);
   } catch (error) {
@@ -67,6 +65,7 @@ app.get('/todastransacoes', async (req, res) => {
 app.post('/signin', async (req, res) => {
     try {
       const { email, senha } = req.body;
+      console.log(email, senha);
   
       // Consulte o banco de dados para encontrar um usuário com o email e senha fornecidos
       const usuario = await Usuario.findOne({ email, senha });
@@ -76,9 +75,9 @@ app.post('/signin', async (req, res) => {
         return res.status(401).json({ error: 'Credenciais inválidas' });
       }
   
-      // Se as credenciais estiverem corretas, você pode gerar um token JWT ou algum outro método de autenticação
-      // Aqui, apenas simularemos um token aleatório
+      // Se as credenciais estiverem corretas, gera um token 
       const token = Math.random().toString(36).substring(2);
+      console.log(token);
   
       return res.status(200).json({ token });
     } catch (error) {
@@ -87,16 +86,14 @@ app.post('/signin', async (req, res) => {
     }
   }); 
   
-  
+  // Rota para consultar usuarios pelo email
   app.get('/usuarios/email/:user', async (req, res) => {
     try {
       const { user } = req.params;
-  
-      // Use o método findOne do modelo 'usuarios' para buscar um usuário com o email fornecido
-      const usuario = await Usuario.findOne({ email: user }); // Use { email: user } para pesquisar no campo "email"
+      const usuario = await Usuario.findOne({ email: user });
   
       if (!usuario) {
-        // Se nenhum usuário for encontrado, retorne um status 404 (Não Encontrado)
+        // Se nenhum usuário for encontrado, retorna um status 404 (Não Encontrado)
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
   
@@ -107,9 +104,26 @@ app.post('/signin', async (req, res) => {
       return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
-  
-  
 
+  // Rota para deletar uma transação pelo campo "id"
+app.delete('/transacao/delete/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deletedTransaction = await Transaction.findOneAndDelete({ id });
+  
+      if (!deletedTransaction) {
+        return res.status(404).json({ error: 'Transação não encontrada' });
+      }
+  
+      return res.status(200).json(deletedTransaction);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+  
+  
+// API rodando na porta 5000
 app.listen(port, () => {
   console.log(`API de transações ouvindo na porta ${port}`);
 });
