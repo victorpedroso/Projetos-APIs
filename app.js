@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Conexão com o banco de dados MongoDB 
-mongoose.connect('mongodb+srv://victor1pedroso:TjUUgnwP09jd9jXy@cluster0.tz545aq.mongodb.net/controleFinanceiro', {
+mongoose.connect('<URL DO SEU BANCO DE DADOS MONGODB>', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
